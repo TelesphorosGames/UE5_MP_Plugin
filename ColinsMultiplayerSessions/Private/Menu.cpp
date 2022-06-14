@@ -7,7 +7,7 @@
 #include "Components/Button.h"
 #include "MultiplayerSessionSubsystem.h"
 #include "OnlineSubsystem.h"
-#include "Interfaces/OnlineSessionInterface.h"
+// #include "Interfaces/OnlineSessionInterface.h"
 
 void UMenu::MenuSetup(int32 NumberOfPublicConnections, FString TypeOfMatch) 
 {
@@ -69,10 +69,7 @@ bool UMenu::Initialize()
 	if(HostButton)
 	{
 		HostButton->OnClicked.AddDynamic(this, &UMenu::HostButtonClicked);
-		if(MultiplayerSessionSubsystem)
-		{
-			MultiplayerSessionSubsystem->CreateSession(NumPublicConnections, MatchType);
-		}
+	
 	}
 
 	if(JoinButton)
@@ -86,9 +83,9 @@ bool UMenu::Initialize()
 
 void UMenu::OnLevelRemovedFromWorld(ULevel* InLevel, UWorld* InWorld)
 {
-	
-	Super::OnLevelRemovedFromWorld(InLevel, InWorld);
 	MenuTeardown();
+	Super::OnLevelRemovedFromWorld(InLevel, InWorld);
+
 }
 
 void UMenu::OnCreateSession(bool bWasSuccessful)
@@ -166,32 +163,23 @@ void UMenu::OnDestroySession(bool bWasSuccessful)
 {
 }
 
-void UMenu::OnStartSession(bool bWasSuvvessful)
+void UMenu::OnStartSession(bool bWasSuccessful)
 {
+	
 }
 
 
 void UMenu::HostButtonClicked()
 {
-	if(GEngine)
-	{
-		GEngine->AddOnScreenDebugMessage(-1, 15.f, FColor::Yellow, FString(TEXT("Host Button Clicked!")));
-	}
-
 	if(MultiplayerSessionSubsystem)
 	{
-		MultiplayerSessionSubsystem->CreateSession(4, FString("FreeForAll"));
-	
+		MultiplayerSessionSubsystem->CreateSession(NumPublicConnections, MatchType);
 	}
 	
 }
 
 void UMenu::JoinButtonClicked()
 {
-	if(GEngine)
-	{
-		GEngine->AddOnScreenDebugMessage(-1, 15.f, FColor::Yellow, FString(TEXT("Join Button Clicked!")));
-	}
 	if(MultiplayerSessionSubsystem)
 	{
 		MultiplayerSessionSubsystem->FindSessions(10000);

@@ -28,11 +28,16 @@ void UMultiplayerSessionSubsystem::CreateSession(int32 NumPublicConnections, FSt
 	{
 		return;
 	}
+
+	
 	auto ExistingSession = SessionInterface->GetNamedSession(NAME_GameSession);
-	if(ExistingSession != nullptr)
+	if(ExistingSession)
 	{
 		SessionInterface->DestroySession(NAME_GameSession);
 	}
+	
+	
+	
 	// Stores the delegate in an FDelegateHandle so we can later remove it from the invocation list
 	CreateSessionCompleteDelegateHandle = SessionInterface->AddOnCreateSessionCompleteDelegate_Handle(CreateSessionCompleteDelegate);
 
@@ -69,7 +74,7 @@ void UMultiplayerSessionSubsystem::FindSessions(int32 MaxSearchResults)
 	}
 	FindSessionCompleteDelegateHandle = SessionInterface->AddOnFindSessionsCompleteDelegate_Handle(FindSessionsCompleteDelegate);
 
-	LastSessionSearch= MakeShareable(new FOnlineSessionSearch());
+	LastSessionSearch = MakeShareable(new FOnlineSessionSearch());
 	LastSessionSearch->MaxSearchResults = MaxSearchResults;
 	LastSessionSearch->bIsLanQuery = IOnlineSubsystem::Get()->GetSubsystemName() == "NULL" ? true : false;
 	LastSessionSearch->QuerySettings.Set(SEARCH_PRESENCE, true, EOnlineComparisonOp::Equals);
@@ -80,6 +85,9 @@ void UMultiplayerSessionSubsystem::FindSessions(int32 MaxSearchResults)
 
 	if(!SessionInterface->FindSessions(*LocalPlayer->GetPreferredUniqueNetId(), LastSessionSearch.ToSharedRef()))
 	{
+
+		UE_LOG(LogTemp,Warning,TEXT("Find sessions failed"));
+		
 		SessionInterface->ClearOnFindSessionsCompleteDelegate_Handle(FindSessionCompleteDelegateHandle);
 
 		MultiplayerSubsessionOnFindSessionComplete.Broadcast(TArray<FOnlineSessionSearchResult>(), false);

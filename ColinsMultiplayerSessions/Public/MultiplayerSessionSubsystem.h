@@ -10,6 +10,14 @@
 
 #include "MultiplayerSessionSubsystem.generated.h"
 
+// Declaring custom Delegates for the Menu Class to bind callbacks to
+
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FMultiplayerSubsessionOnCreateSessionComplete, bool, bWasSuccessful);
+DECLARE_MULTICAST_DELEGATE_TwoParams(FMultiplayerSubsessionOnFindSessionComplete, const TArray<FOnlineSessionSearchResult>& SessionResults, bool bWasSuccessful);
+DECLARE_MULTICAST_DELEGATE_OneParam(FMultiplayerSubssessionOnJoinSessionComplete, EOnJoinSessionCompleteResult::Type Result);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FMultiplayerSubsessionOnDestroySessionComplete, bool, bWasSuccessful);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FMultiplayerSubsessionOnStartSessionComplete, bool, bWasSuccessful);
+
 /**
  * 
  */
@@ -34,6 +42,15 @@ public:
 	void StartSession();
 
 
+	// Our custom delegates
+
+	FMultiplayerSubsessionOnCreateSessionComplete MultiplayerSubsessionOnCreateSessionComplete;
+	FMultiplayerSubsessionOnFindSessionComplete MultiplayerSubsessionOnFindSessionComplete;
+	FMultiplayerSubssessionOnJoinSessionComplete MultiplayerSubssessionOnJoinSessionComplete;
+	FMultiplayerSubsessionOnDestroySessionComplete MultiplayerSubsessionOnDestroySessionComplete;
+	FMultiplayerSubsessionOnStartSessionComplete MultiplayerSubsessionOnStartSessionComplete;
+
+
 	
 protected:
 
@@ -49,11 +66,18 @@ protected:
 	void OnDestroySessionComplete(FName SessionName, bool bWasSuccessful);
 
 	void OnStartSessionComplete(FName SessionName, bool bWasSuccessful);
+
+
+
+	
 	
 
 private:
 
 	IOnlineSessionPtr SessionInterface;
+
+	TSharedPtr<FOnlineSessionSettings> LastSessionSettings;
+	TSharedPtr<FOnlineSessionSearch> LastSessionSearch;
 
 	// To add to the Online Session Interface Delegate list,
 	// We will bind our MultiplayerSessionsSubsystem internal callbacks to these

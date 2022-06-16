@@ -20,7 +20,7 @@ class COLINSMULTIPLAYERSESSIONS_API UMenu : public UUserWidget
 public:
 
 	UFUNCTION(BlueprintCallable)
-	void MenuSetup(int32 NumberOfPublicConnections = 4, FString TypeOfMatch = FString(TEXT("FreeForAll")));
+	void MenuSetup(int32 NumberOfPublicConnections = 4, FString TypeOfMatch = FString(TEXT("FreeForAll")), FString LobbyPath = FString(TEXT("/Game/ThirdPerson/Maps/MyLobby")));
 
 protected:
 
@@ -51,11 +51,17 @@ private:
 	UPROPERTY(meta = (BindWidget))
 	UButton* JoinButton;
 
+	UPROPERTY(meta = (BindWidget))
+	UButton* StartButton;
+
 	UFUNCTION()
 	void HostButtonClicked();
 
 	UFUNCTION()
 	void JoinButtonClicked();
+
+	UFUNCTION()
+	void StartButtonClicked();
 
 	void MenuTeardown();
 
@@ -66,5 +72,5 @@ private:
 
 	int32 NumPublicConnections= 4;
 	FString MatchType= FString("FreeForAll");
-	
+	FString PathToLobby = {TEXT("")};
 };

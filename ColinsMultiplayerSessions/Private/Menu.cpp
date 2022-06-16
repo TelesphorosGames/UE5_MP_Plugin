@@ -10,9 +10,12 @@
 
 // #include "Interfaces/OnlineSessionInterface.h"
 
-void UMenu::MenuSetup(int32 NumberOfPublicConnections, FString TypeOfMatch, FString LobbyPath) 
+void UMenu::MenuSetup(int32 NumberOfPublicConnections, FString TypeOfMatch, FString LobbyPath, FString GamePath) 
 {
+
+	
 	PathToLobby = FString::Printf(TEXT("%s?listen"), *LobbyPath);
+	PathToGameMap = FString::Printf(TEXT("%s?listen"), *GamePath);
 	NumPublicConnections = NumberOfPublicConnections;
 	MatchType = TypeOfMatch;
 	AddToViewport();
@@ -34,10 +37,10 @@ void UMenu::MenuSetup(int32 NumberOfPublicConnections, FString TypeOfMatch, FStr
 			PlayerController->SetInputMode(InputModeData);
 
 			PlayerController->SetShowMouseCursor(true);
-			
+						
 		}
 	}
-
+	
 	UGameInstance* GameInstance = GetGameInstance();
 	if(GameInstance)
 	{
@@ -57,7 +60,7 @@ void UMenu::MenuSetup(int32 NumberOfPublicConnections, FString TypeOfMatch, FStr
 		MultiplayerSessionSubsystem->MultiplayerSubsessionOnStartSessionComplete.AddDynamic(this, &ThisClass::OnStartSession);
 	}
 
-	
+
 	
 }
 
@@ -82,6 +85,7 @@ bool UMenu::Initialize()
 	if(StartButton)
 	{
 		StartButton->OnClicked.AddDynamic(this, &UMenu::StartButtonClicked);
+		StartButton->SetIsEnabled(false);
 	}
 	
 
@@ -102,6 +106,7 @@ void UMenu::OnCreateSession(bool bWasSuccessful)
 {
 	if(bWasSuccessful)
 	{
+		StartButton->SetIsEnabled(true);
 		if(GEngine)
 		{
 			GEngine->AddOnScreenDebugMessage(-1, 15.f, FColor::Yellow, FString(TEXT("SESSION CREATED SUCCESSFULLY!")));
@@ -146,6 +151,7 @@ void UMenu::OnFindSessions(const TArray<FOnlineSessionSearchResult>& SessionResu
 		{
 			GEngine->AddOnScreenDebugMessage(-1, 15.f, FColor::Red, FString(TEXT("NO SESSIONS FOUND!")));
 		}
+		HostButton->SetIsEnabled(true);
 		JoinButton->SetIsEnabled(true);
 	}
 }
@@ -167,9 +173,11 @@ void UMenu::OnJoinSession(EOnJoinSessionCompleteResult::Type Result)
 			if(PlayerController)
 			{
 				PlayerController->ClientTravel(Address, ETravelType::TRAVEL_Absolute);
+				
 				if(GEngine)
 				{
 					GEngine->AddOnScreenDebugMessage(-1, 15.f, FColor::Magenta, FString::Printf(TEXT("SESSION JOINED! NAME:  %s ADDRESS: %s "), *SessionInterface->GetNamedSession(NAME_GameSession)->SessionName.ToString(), *Address));
+					GEngine->AddOnScreenDebugMessage(3, 20.f, FColor::Orange, FString::Printf(TEXT("WAITING FOR HOST TO START THE SESSION....")));
 				}
 			}
 		}
@@ -190,6 +198,7 @@ void UMenu::OnJoinSession(EOnJoinSessionCompleteResult::Type Result)
 
 void UMenu::OnDestroySession(bool bWasSuccessful)
 {
+	
 }
 
 void UMenu::OnStartSession(bool bWasSuccessful)
@@ -199,7 +208,7 @@ void UMenu::OnStartSession(bool bWasSuccessful)
 		UWorld* World = GetWorld();
         	if(World)
         	{
-        		World->ServerTravel(PathToLobby);
+        		World->ServerTravel(PathToGameMap);
         	}
 	}
 	
@@ -213,6 +222,8 @@ void UMenu::HostButtonClicked()
 	{
 		MultiplayerSessionSubsystem->CreateSession(NumPublicConnections, MatchType);
 		HostButton->SetIsEnabled(false);
+		JoinButton->SetIsEnabled(false);
+		
 	}
 	
 }
@@ -222,7 +233,9 @@ void UMenu::JoinButtonClicked()
 	if(MultiplayerSessionSubsystem)
 	{
 		MultiplayerSessionSubsystem->FindSessions(10000);
+		HostButton->SetIsEnabled(false);
 		JoinButton->SetIsEnabled(false);
+		StartButton->SetIsEnabled(false);
 	}
 }
 
@@ -252,6 +265,7 @@ void UMenu::MenuTeardown()
 		
 		
 	}
+	
 
 	
 }

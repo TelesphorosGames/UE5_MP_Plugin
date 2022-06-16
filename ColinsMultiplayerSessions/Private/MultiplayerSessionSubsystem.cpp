@@ -72,7 +72,13 @@ void UMultiplayerSessionSubsystem::FindSessions(int32 MaxSearchResults)
 {
 	if(!SessionInterface.IsValid())
 	{
+
+		if(GEngine)
+		{
+			GEngine->AddOnScreenDebugMessage(-1, 10.f, FColor::Red, FString::Printf(TEXT("SESSION INTERFACE INVALID")));
+		}
 		return;
+		
 	}
 	FindSessionCompleteDelegateHandle = SessionInterface->AddOnFindSessionsCompleteDelegate_Handle(FindSessionsCompleteDelegate);
 
@@ -80,6 +86,7 @@ void UMultiplayerSessionSubsystem::FindSessions(int32 MaxSearchResults)
 	LastSessionSearch->MaxSearchResults = MaxSearchResults;
 	LastSessionSearch->bIsLanQuery = IOnlineSubsystem::Get()->GetSubsystemName() == "NULL" ? true : false;
 	LastSessionSearch->QuerySettings.Set(SEARCH_PRESENCE, true, EOnlineComparisonOp::Equals);
+	LastSessionSearch->TimeoutInSeconds = 10.f;
 
 	const ULocalPlayer* LocalPlayer = GetWorld()->GetFirstLocalPlayerFromController();
 	
@@ -217,11 +224,14 @@ void UMultiplayerSessionSubsystem::OnStartSessionComplete(FName SessionName, boo
 	{
 		SessionInterface->ClearOnStartSessionCompleteDelegate_Handle(StartSessionCompleteDelegateHandle);
 	}
-
-	if(GEngine)
+	if(bWasSuccessful)
 	{
-		GEngine->AddOnScreenDebugMessage(-1, 10.f, FColor::Purple, FString::Printf(TEXT("Session %s Started Successfully!"), *SessionName.ToString()));
+		if(GEngine)
+        	{
+        		GEngine->AddOnScreenDebugMessage(-1, 10.f, FColor::Purple, FString::Printf(TEXT("Session %s Started Successfully!"), *SessionName.ToString()));
+        	}
 	}
+	
 	MultiplayerSubsessionOnStartSessionComplete.Broadcast(bWasSuccessful);
 	
 }
